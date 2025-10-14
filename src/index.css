@@ -1,0 +1,39 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* estilo base para aproximar do layout do print */
+:root {
+  --site-bg: #f7fafc; /* gray-50 */
+}
+
+/* reset / base */
+html, body, #root {
+  height: 100%;
+}
+body {
+  @apply bg-gray-50 text-gray-900 antialiased;
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* largura centralizada do conteúdo */
+.main-container {
+  @apply max-w-5xl mx-auto px-6 md:px-12;
+}
+
+/* pequenos ajustes que usei nos componentes */
+.rounded-xl { border-radius: 12px; }
+.rounded-2xl { border-radius: 16px; }
+
+/* botão primário (alternativa caso queira) */
+.btn-primary {
+  @apply inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-gradient-to-br from-blue-600 to-indigo-600 text-white font-medium shadow;
+}
+
+/* feedback pequeno copiado */
+.copy-toast {
+  @apply fixed bottom-6 right-6 bg-black text-white text-sm px-3 py-2 rounded-md shadow;
+}
+    
