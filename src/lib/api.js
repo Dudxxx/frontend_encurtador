@@ -1,16 +1,18 @@
-// src/lib/api.js
+
 const BASE = import.meta.env.VITE_API_URL || "http://localhost:4000/api";
-// remove possível /api no final para obter a origem do backend
+
 const BACKEND_ORIGIN = BASE.replace(/\/api\/?$/, "") ;
 
 async function request(path, options = {}) {
   const url = `${BASE}${path}`;
+
+  const headers = options.body
+    ? { "Content-Type": "application/json", ...(options.headers || {}) }
+    : (options.headers || {});
+
   const res = await fetch(url, {
     credentials: "same-origin",
-    headers: {
-      "Content-Type": "application/json",
-      ...(options.headers || {}),
-    },
+    headers,
     ...options,
   });
 
@@ -45,10 +47,9 @@ export async function updateLink(id, payload) {
   });
 }
 
-export async function deleteLink(id) {
-  return await request(`/links/${id}`, {
-    method: "DELETE",
-  });
+export async function deleteLink(idOrCode) {
+
+  return await request(`/links/${encodeURIComponent(String(idOrCode))}`, { method: "DELETE" });
 }
 
 export { BASE as API_BASE, BACKEND_ORIGIN };

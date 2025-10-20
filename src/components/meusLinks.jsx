@@ -63,14 +63,17 @@ export default function MeusLinks({ links = [], onUpdate, onDelete }) {
         }
     };
 
-    const confirmarExcluir = async (id) => {
-        if (!window.confirm("Deseja realmente excluir este link?")) return;
-        try {
-            await Promise.resolve(onDelete?.(id));
-        } catch {
-            alert("Erro ao excluir link.");
-        }
-    };
+    const confirmarExcluir = async (link) => {
+    if (!window.confirm("Deseja realmente excluir este link?")) return;
+
+    try {
+
+        await Promise.resolve(onDelete?.(link));
+    } catch (err) {
+        console.error("Erro ao excluir (UI):", err);
+        alert("Erro ao excluir link. Tente novamente.");
+    }
+};
 
     return (
         <div>
@@ -194,7 +197,7 @@ export default function MeusLinks({ links = [], onUpdate, onDelete }) {
                                                 <Edit2 size={16} />
                                             </button>
                                             <button
-                                                onClick={() => confirmarExcluir(link.id)}
+                                                onClick={() => confirmarExcluir(link)}
                                                 title="Excluir"
                                                 className="p-2 rounded-lg border hover:bg-gray-50 text-red-600 sm:hidden"
                                             >

@@ -1,7 +1,7 @@
-// src/components/gerarLink.jsx
+
 import React, { useState } from "react";
 import { Link2, Check, Loader2 } from "lucide-react";
-import { createLink, BACKEND_ORIGIN } from "../lib/api"; // <- importa BACKEND_ORIGIN
+import { createLink, BACKEND_ORIGIN } from "../lib/api";
 
 export default function GerarLink({ onCreate }) {
   const [legenda, setLegenda] = useState("");
@@ -43,7 +43,7 @@ export default function GerarLink({ onCreate }) {
         code: created.code,
         clicks: created.clicks ?? 0,
         createdAt: created.created_at ?? created.createdAt ?? new Date().toISOString(),
-        // usa BACKEND_ORIGIN aqui (IMPORTANTE)
+
         shortUrl: `${BACKEND_ORIGIN}/${created.code}`,
       };
 

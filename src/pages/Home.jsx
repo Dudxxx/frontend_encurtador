@@ -1,4 +1,4 @@
-// src/pages/Home.jsx
+
 import React, { useEffect, useState } from "react";
 import GerarLink from "../components/gerarLink.jsx";
 import MeusLinks from "../components/meusLinks.jsx";
@@ -15,23 +15,20 @@ export default function Home() {
   });
   const [loading, setLoading] = useState(false);
 
-  // quando links mudam, guarda no localStorage (cache)
   useEffect(() => {
     try {
       localStorage.setItem("meus-links", JSON.stringify(links));
     } catch {
-      // ignore
+
     }
   }, [links]);
 
-  // busca do backend ao montar
   useEffect(() => {
     let cancelled = false;
     async function load() {
       setLoading(true);
       try {
-        const data = await fetchLinks(); // retorna array do backend
-        // mapear campo created_at -> createdAt e criar shortUrl
+        const data = await fetchLinks();
         const mapped = (Array.isArray(data) ? data : []).map((it) => ({
           id: (it.id ?? it.code) + "",
           legenda: it.legenda,
@@ -44,7 +41,7 @@ export default function Home() {
         if (!cancelled) setLinks(mapped);
       } catch (err) {
         console.warn("Falha ao buscar links do servidor:", err);
-        // manter localStorage se existir
+
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -56,16 +53,16 @@ export default function Home() {
   }, []);
 
   const handleCreate = async (novoLink) => {
-    // novoLink já vem mapeado pelo GerarLink (shortUrl e createdAt)
+
     setLinks((prev) => [novoLink, ...prev]);
     return novoLink;
   };
 
   const handleUpdate = async (atualizado) => {
     try {
-      // enviar para o backend (backend espera id numérico)
+
       const idToSend = atualizado.id;
-      // monta payload que backend espera (legenda, url)
+
       await updateLink(idToSend, { legenda: atualizado.legenda, url: atualizado.url });
       setLinks((prev) => prev.map((l) => (l.id === atualizado.id ? { ...l, ...atualizado } : l)));
     } catch (err) {
@@ -74,15 +71,46 @@ export default function Home() {
     }
   };
 
-  const handleDelete = async (id) => {
-    try {
-      await deleteLink(id);
-      setLinks((prev) => prev.filter((l) => l.id !== id));
-    } catch (err) {
-      console.error("Erro ao deletar no servidor:", err);
-      throw err;
+  const handleDelete = async (payload) => {
+
+  try {
+
+    if (typeof payload === "object" && payload !== null) {
+      const link = payload;
+
+      if (link.code) {
+        await deleteLink(link.code); 
+        setLinks((prev) => prev.filter((l) => l.code !== link.code && String(l.id) !== String(link.id)));
+        return;
+      }
+
+      if (/^\d+$/.test(String(link.id))) {
+        await deleteLink(link.id);
+        setLinks((prev) => prev.filter((l) => String(l.id) !== String(link.id)));
+        return;
+      }
+
+      setLinks((prev) => prev.filter((l) => l.id !== link.id));
+      return;
     }
-  };
+
+
+    const rawId = payload;
+    if (/^\d+$/.test(String(rawId))) {
+
+      await deleteLink(Number(rawId));
+      setLinks((prev) => prev.filter((l) => String(l.id) !== String(rawId)));
+      return;
+    }
+
+    await deleteLink(rawId);
+    setLinks((prev) => prev.filter((l) => l.code !== rawId && String(l.id) !== String(rawId)));
+  } catch (err) {
+    console.error("Erro ao deletar no servidor:", err);
+
+    alert("Não foi possível excluir no servidor. Verifique os logs do backend e tente novamente.");
+  }
+};
 
   return (
     <div className="min-h-screen bg-gray-50 p-6 md:p-12">
