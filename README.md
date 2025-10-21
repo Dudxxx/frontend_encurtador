@@ -1,8 +1,8 @@
 # Encurtador de URLs
 
 ## Demo (deploys)
-- Back-end (Render): https://your-backend.onrender.com/  
-- Front-end (Vercel/Netlify): https://your-frontend.vercel.app/  
+- Back-end (Render): sorry 
+- Front-end (Vercel/Netlify): Eduardo.  
 
 O projeto neste repositório é um encurtador de URLs com interface React + Vite e chamadas a uma API (back-end). Ele permite criar, copiar, editar e excluir links, além de mostrar contagem de cliques e data de criação.
 
