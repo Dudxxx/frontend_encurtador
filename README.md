@@ -1,8 +1,8 @@
 # Encurtador de URLs
 
 ## Demo (deploys)
-- Back-end (Render): sorry 
-- Front-end (Vercel/Netlify): Eduardo.  
+- Back-end (Render): Drizze não é compativel com o render
+- Front-end (Vercel/Netlify): [https://frontend-encurtador-git-main-dudxxxs-projects.vercel.app/](https://frontend-encurtador-git-main-dudxxxs-projects.vercel.app/)  
 
 O projeto neste repositório é um encurtador de URLs com interface React + Vite e chamadas a uma API (back-end). Ele permite criar, copiar, editar e excluir links, além de mostrar contagem de cliques e data de criação.
 
