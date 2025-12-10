@@ -1,7 +1,10 @@
 // src/lib/api.js
 const BASE_RAW = import.meta.env.VITE_API_URL;
 const BASE = (BASE_RAW ? String(BASE_RAW).replace(/\/+$/, "") : "https://backend-encurtador.onrender.com/api");
-const BACKEND_ORIGIN = BASE.replace(/\/api\/?$/, "");
+
+// Garante que BACKEND_ORIGIN tenha protocolo quando possível
+const rawOrigin = BASE.replace(/\/api\/?$/, "");
+const BACKEND_ORIGIN = /^https?:\/\//i.test(rawOrigin) ? rawOrigin : (rawOrigin ? `https://${rawOrigin}` : rawOrigin);
 
 async function request(path, options = {}) {
   const cleanedPath = path.startsWith("/") ? path : `/${path}`;
@@ -11,8 +14,6 @@ async function request(path, options = {}) {
     ? { "Content-Type": "application/json", ...(options.headers || {}) }
     : (options.headers || {});
 
-  // Use 'omit' by default (safer para cross-origin sem cookies)
-  // Se o backend usar cookies de sessão, troque para 'include' e configure CORS credentials no backend.
   const fetchOptions = {
     credentials: "omit",
     headers,
@@ -24,19 +25,30 @@ async function request(path, options = {}) {
   const res = await fetch(url, fetchOptions);
   const text = await res.text();
 
+  let json = null;
   try {
-    const json = text ? JSON.parse(text) : null;
-    if (!res.ok) {
-      const msg = json?.message ?? json ?? text ?? `HTTP ${res.status}`;
-      const err = new Error(msg);
-      err.status = res.status;
-      throw err;
-    }
-    return json;
+    json = text ? JSON.parse(text) : null;
   } catch (err) {
-    if (!res.ok) throw err;
-    return text;
+    // texto não-JSON — mantemos como text
+    json = text;
   }
+
+  if (!res.ok) {
+    const msg = (json && json.message) || json || text || `HTTP ${res.status}`;
+    const err = new Error(msg);
+    err.status = res.status;
+    throw err;
+  }
+
+  // Se a API usar o wrapper { success: true, data: ..., shortUrl: "..." }
+  if (json && typeof json === "object" && "data" in json) {
+    // mescla data + shortUrl (se existir) para compatibilidade com o frontend atual
+    const merged = { ...(json.data || {}) };
+    if ("shortUrl" in json && json.shortUrl) merged.shortUrl = json.shortUrl;
+    return merged;
+  }
+
+  return json;
 }
 
 export async function fetchLinks() {

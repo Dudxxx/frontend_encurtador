@@ -53,14 +53,14 @@ export default function GerarLink({ onCreate }) {
       const created = await createLink({ legenda: legendaTrim, url: urlToSend });
 
       const mapped = {
-        id: (created.id ?? created.code) + "",
-        legenda: created.legenda ?? legendaTrim,
-        url: created.url ?? urlToSend,
-        code: created.code,
-        clicks: created.clicks ?? 0,
-        createdAt: created.created_at ?? created.createdAt ?? new Date().toISOString(),
-        shortUrl: `${BACKEND_ORIGIN}/${created.code}`,
-      };
+  id: (created.id ?? created.code) + "",
+  legenda: created.legenda ?? legendaTrim,
+  url: created.url ?? urlToSend,
+  code: created.code,
+  clicks: created.clicks ?? 0,
+  createdAt: created.created_at ?? created.createdAt ?? new Date().toISOString(),
+  shortUrl: created.shortUrl ?? `${BACKEND_ORIGIN}/${created.code}`,
+};
 
       await Promise.resolve(onCreate?.(mapped));
 
