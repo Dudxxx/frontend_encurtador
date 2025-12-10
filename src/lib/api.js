@@ -1,26 +1,36 @@
-
-const BASE = import.meta.env.VITE_API_URL || "https://backend-encurtador.onrender.com";
-
-const BACKEND_ORIGIN = BASE.replace(/\/api\/?$/, "") ;
+// src/lib/api.js
+const BASE_RAW = import.meta.env.VITE_API_URL;
+const BASE = (BASE_RAW ? String(BASE_RAW).replace(/\/+$/, "") : "https://backend-encurtador.onrender.com/api");
+const BACKEND_ORIGIN = BASE.replace(/\/api\/?$/, "");
 
 async function request(path, options = {}) {
-  const url = `${BASE}${path}`;
+  const cleanedPath = path.startsWith("/") ? path : `/${path}`;
+  const url = `${BASE}${cleanedPath}`;
 
   const headers = options.body
     ? { "Content-Type": "application/json", ...(options.headers || {}) }
     : (options.headers || {});
 
-  const res = await fetch(url, {
-    credentials: "same-origin",
+  // Use 'omit' by default (safer para cross-origin sem cookies)
+  // Se o backend usar cookies de sessão, troque para 'include' e configure CORS credentials no backend.
+  const fetchOptions = {
+    credentials: "omit",
     headers,
     ...options,
-  });
+  };
 
+  console.debug("[API] fetch", url, fetchOptions);
+
+  const res = await fetch(url, fetchOptions);
   const text = await res.text();
+
   try {
     const json = text ? JSON.parse(text) : null;
     if (!res.ok) {
-      throw new Error(json?.message ?? json ?? text ?? `HTTP ${res.status}`);
+      const msg = json?.message ?? json ?? text ?? `HTTP ${res.status}`;
+      const err = new Error(msg);
+      err.status = res.status;
+      throw err;
     }
     return json;
   } catch (err) {
@@ -48,7 +58,6 @@ export async function updateLink(id, payload) {
 }
 
 export async function deleteLink(idOrCode) {
-
   return await request(`/links/${encodeURIComponent(String(idOrCode))}`, { method: "DELETE" });
 }
 
