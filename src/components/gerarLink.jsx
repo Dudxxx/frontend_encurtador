@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Link2, Check, Loader2 } from "lucide-react";
 import { createLink, BACKEND_ORIGIN } from "../lib/api";
@@ -10,60 +9,56 @@ export default function GerarLink({ onCreate }) {
   const [loading, setLoading] = useState(false);
 
   function validarUrl(value) {
-  if (!value) return false;
-  const cleaned = String(value).trim();
-  if (!cleaned) return false;
+    if (!value) return false;
+    const cleaned = String(value).trim();
+    if (!cleaned) return false;
 
-  // primeira tentativa: URL como foi passada
-  try {
-    new URL(cleaned);
-    return true;
-  } catch {}
+    // primeira tentativa: URL como foi passada
+    try {
+      new URL(cleaned);
+      return true;
+    } catch {}
 
-  // segunda tentativa: adiciona https:// se o usuário esqueceu o esquema
-  try {
-    new URL("https://" + cleaned);
-    return true;
-  } catch {}
+    // segunda tentativa: adiciona https:// se o usuário esqueceu o esquema
+    try {
+      new URL("https://" + cleaned);
+      return true;
+    } catch {}
 
-  return false;
-}
+    return false;
+  }
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
-  setError(null);
+    e.preventDefault();
+    setError(null);
 
-  const legendaTrim = legenda.trim();
-  const urlTrim = url.trim();
+    const legendaTrim = legenda.trim();
+    const urlTrim = url.trim();
 
-  if (!legendaTrim) {
-    setError("Preencha a legenda do link.");
-    return;
-  }
-  if (!urlTrim || !validarUrl(urlTrim)) {
-    setError("Insira uma URL válida (ex: https://exemplo.com).");
-    return;
-  }
+    if (!legendaTrim) {
+      setError("Preencha a legenda do link.");
+      return;
+    }
+    if (!urlTrim || !validarUrl(urlTrim)) {
+      setError("Insira uma URL válida (ex: https://exemplo.com).");
+      return;
+    }
 
-  setLoading(true);
-
-  try {
-    // garanta que quem for receber sempre tenha o esquema
-    const urlToSend = /^https?:\/\//i.test(urlTrim) ? urlTrim : `https://${urlTrim}`;
-
-    const created = await createLink({ legenda: legendaTrim, url: urlToSend });
+    setLoading(true);
 
     try {
-      const created = await createLink({ legenda: legenda.trim(), url: url.trim() });
+      // garante que quem receber sempre tenha o esquema
+      const urlToSend = /^https?:\/\//i.test(urlTrim) ? urlTrim : `https://${urlTrim}`;
+
+      const created = await createLink({ legenda: legendaTrim, url: urlToSend });
 
       const mapped = {
         id: (created.id ?? created.code) + "",
-        legenda: created.legenda ?? legenda.trim(),
-        url: created.url ?? url.trim(),
+        legenda: created.legenda ?? legendaTrim,
+        url: created.url ?? urlToSend,
         code: created.code,
         clicks: created.clicks ?? 0,
         createdAt: created.created_at ?? created.createdAt ?? new Date().toISOString(),
-
         shortUrl: `${BACKEND_ORIGIN}/${created.code}`,
       };
 
@@ -73,7 +68,7 @@ export default function GerarLink({ onCreate }) {
       setUrl("");
     } catch (err) {
       console.error("Erro ao criar link (UI):", err);
-      setError(err.message ?? "Erro ao criar link. Tente novamente.");
+      setError(err?.message ?? String(err) ?? "Erro ao criar link. Tente novamente.");
     } finally {
       setLoading(false);
     }
@@ -88,7 +83,9 @@ export default function GerarLink({ onCreate }) {
           </div>
           <div>
             <h1 className="text-3xl font-extrabold">Encurtador de Links</h1>
-            <p className="text-sm text-gray-500">Transforme links longos em URLs curtas e fáceis de compartilhar</p>
+            <p className="text-sm text-gray-500">
+              Transforme links longos em URLs curtas e fáceis de compartilhar
+            </p>
           </div>
         </div>
       </div>
