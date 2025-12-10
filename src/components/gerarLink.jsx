@@ -10,28 +10,48 @@ export default function GerarLink({ onCreate }) {
   const [loading, setLoading] = useState(false);
 
   function validarUrl(value) {
-    try {
-      new URL(value);
-      return true;
-    } catch {
-      return false;
-    }
-  }
+  if (!value) return false;
+  const cleaned = String(value).trim();
+  if (!cleaned) return false;
+
+  // primeira tentativa: URL como foi passada
+  try {
+    new URL(cleaned);
+    return true;
+  } catch {}
+
+  // segunda tentativa: adiciona https:// se o usuário esqueceu o esquema
+  try {
+    new URL("https://" + cleaned);
+    return true;
+  } catch {}
+
+  return false;
+}
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError(null);
+  e.preventDefault();
+  setError(null);
 
-    if (!legenda.trim()) {
-      setError("Preencha a legenda do link.");
-      return;
-    }
-    if (!url.trim() || !validarUrl(url.trim())) {
-      setError("Insira uma URL válida (ex: https://exemplo.com).");
-      return;
-    }
+  const legendaTrim = legenda.trim();
+  const urlTrim = url.trim();
 
-    setLoading(true);
+  if (!legendaTrim) {
+    setError("Preencha a legenda do link.");
+    return;
+  }
+  if (!urlTrim || !validarUrl(urlTrim)) {
+    setError("Insira uma URL válida (ex: https://exemplo.com).");
+    return;
+  }
+
+  setLoading(true);
+
+  try {
+    // garanta que quem for receber sempre tenha o esquema
+    const urlToSend = /^https?:\/\//i.test(urlTrim) ? urlTrim : `https://${urlTrim}`;
+
+    const created = await createLink({ legenda: legendaTrim, url: urlToSend });
 
     try {
       const created = await createLink({ legenda: legenda.trim(), url: url.trim() });
